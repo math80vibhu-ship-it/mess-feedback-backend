@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hostel Mess Hub & Feedback System</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Background Decorative Ambient Glows -->
+  <div class="bg-glow glow-1"></div>
+  <div class="bg-glow glow-2"></div>
+
+  <!-- Header / Navigation Navbar -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <i class="fa-solid => fa-utensils"></i>
+        </div>
+        <div class="brand-text">
+          <h1>Mess<span>Hub</span></h1>
+          <p class="tagline">Hostel Menu & Feedback Portal</p>
+        </div>
+      </div>
+
+      <nav class="nav-tabs">
+        <button id="studentTabBtn" class="tab-btn active">
+          <i class="fa-solid fa-graduation-cap"></i> Student View
+        </button>
+        <button id="adminTabBtn" class="tab-btn">
+          <i class="fa-solid fa-chart-pie"></i> Admin Portal
+        </button>
+      </nav>
+
+      <div class="header-actions">
+        <button id="themeToggleBtn" class="icon-btn" title="Toggle Light/Dark Theme">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="main-layout">
+
+    <!-- ===================== STUDENT VIEW ===================== -->
+    <div id="studentView" class="view-content active">
+      <!-- Hero Banner -->
+      <section class="hero-card card">
+        <div class="hero-content">
+          <span class="badge badge-primary"><i class="fa-regular fa-clock"></i> Daily Updates</span>
+          <h2>Taste & Rate Your Daily Meals</h2>
+          <p>Check this week's scheduled menu, discover meal items, and submit your feedback to improve mess quality!</p>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-pill">
+            <span class="stat-num" id="heroMealCount">--</span>
+            <span class="stat-lbl">Active Meals</span>
+          </div>
+          <div class="stat-pill">
+            <span class="stat-num" id="heroAvgRating">--</span>
+            <span class="stat-lbl">Avg Rating</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Day Filter Pills -->
+      <div class="filter-section">
+        <span class="filter-label"><i class="fa-solid fa-filter"></i> Filter Day:</span>
+        <div class="filter-pills" id="dayFilterPills">
+          <button class="pill-btn active" data-day="All">All Days</button>
+          <button class="pill-btn" data-day="Monday">Mon</button>
+          <button class="pill-btn" data-day="Tuesday">Tue</button>
+          <button class="pill-btn" data-day="Wednesday">Wed</button>
+          <button class="pill-btn" data-day="Thursday">Thu</button>
+          <button class="pill-btn" data-day="Friday">Fri</button>
+          <button class="pill-btn" data-day="Saturday">Sat</button>
+          <button class="pill-btn" data-day="Sunday">Sun</button>
+        </div>
+      </div>
+
+      <div class="grid-two-col">
+        <!-- Menu List Card -->
+        <section class="card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-calendar-days"></i> Scheduled Mess Menu</h3>
+            <button id="refreshMenuBtn" class="btn-text" title="Refresh Menu"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+          </div>
+          <div id="menuList" class="menu-grid">
+            <div class="loading-state">
+              <i class="fa-solid fa-circle-notch fa-spin"></i>
+              <p>Fetching today's fresh menu...</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Feedback Submission Form Card -->
+        <section class="card feedback-card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-paper-plane"></i> Share Meal Feedback</h3>
+          </div>
+          <form id="feedbackForm" class="styled-form">
+            <div class="form-group">
+              <label for="menuSelect"><i class="fa-solid fa-bowl-rice"></i> Select Meal Entry</label>
+              <div class="select-wrapper">
+                <select id="menuSelect" required>
+                  <option value="">-- Choose a scheduled meal --</option>
+                </select>
+                <i class="fa-solid fa-chevron-down select-icon"></i>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="studentName"><i class="fa-solid fa-user"></i> Your Name</label>
+                <input type="text" id="studentName" placeholder="e.g. Vibhuti" required />
+              </div>
+              <div class="form-group">
+                <label for="rollNo"><i class="fa-solid fa-id-card"></i> Roll / ID Number</label>
+                <input type="text" id="rollNo" placeholder="e.g. 21BCE1234" required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label><i class="fa-solid fa-star"></i> Meal Rating</label>
+              <div class="star-rating-picker" id="starPicker">
+                <button type="button" class="star-btn" data-val="1" title="1 Star - Poor"><i class="fa-solid fa-star"></i></button>
+                <button type="button" class="star-btn" data-val="2" title="2 Stars - Below Average"><i class="fa-solid fa-star"></i></button>
+                <button type="button" class="star-btn" data-val="3" title="3 Stars - Average"><i class="fa-solid fa-star"></i></button>
+                <button type="button" class="star-btn" data-val="4" title="4 Stars - Good"><i class="fa-solid fa-star"></i></button>
+                <button type="button" class="star-btn" data-val="5" title="5 Stars - Excellent"><i class="fa-solid fa-star"></i></button>
+              </div>
+              <input type="hidden" id="rating" name="rating" required />
+              <div class="rating-label-display" id="ratingTextDisplay">Click stars to rate (1 to 5)</div>
+            </div>
+
+            <div class="form-group">
+              <label for="comment"><i class="fa-solid fa-comment-dots"></i> Review / Comments (Optional)</label>
+              <textarea id="comment" rows="3" placeholder="Tell us about the taste, quality, hygiene, or suggestions..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">
+              <i class="fa-solid fa-paper-plane"></i> Submit Feedback
+            </button>
+          </form>
+        </section>
+      </div>
+    </div>
+
+    <!-- ===================== ADMIN VIEW ===================== -->
+    <div id="adminView" class="view-content hidden">
+      <!-- Admin Overview Stats -->
+      <section class="admin-kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon kpi-blue"><i class="fa-solid fa-comments"></i></div>
+          <div class="kpi-data">
+            <span class="kpi-title">Total Feedbacks</span>
+            <h3 id="adminTotalFeedbacks">0</h3>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon kpi-amber"><i class="fa-solid fa-star"></i></div>
+          <div class="kpi-data">
+            <span class="kpi-title">Average Rating</span>
+            <h3 id="adminAvgRating">0.0 / 5</h3>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon kpi-green"><i class="fa-solid fa-utensils"></i></div>
+          <div class="kpi-data">
+            <span class="kpi-title">Total Menu Items</span>
+            <h3 id="adminTotalMenus">0</h3>
+          </div>
+        </div>
+      </section>
+
+      <div class="grid-two-col">
+        <!-- Add Menu Entry Form Card -->
+        <section class="card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-plus-circle"></i> Add New Menu Item</h3>
+          </div>
+          <form id="menuForm" class="styled-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="day"><i class="fa-solid fa-calendar-day"></i> Day</label>
+                <div class="select-wrapper">
+                  <select id="day" required>
+                    <option value="">-- Select Day --</option>
+                    <option>Monday</option>
+                    <option>Tuesday</option>
+                    <option>Wednesday</option>
+                    <option>Thursday</option>
+                    <option>Friday</option>
+                    <option>Saturday</option>
+                    <option>Sunday</option>
+                  </select>
+                  <i class="fa-solid fa-chevron-down select-icon"></i>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="mealType"><i class="fa-solid fa-clock"></i> Meal Type</label>
+                <div class="select-wrapper">
+                  <select id="mealType" required>
+                    <option value="">-- Select Meal --</option>
+                    <option>Breakfast</option>
+                    <option>Lunch</option>
+                    <option>Snacks</option>
+                    <option>Dinner</option>
+                  </select>
+                  <i class="fa-solid fa-chevron-down select-icon"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="items"><i class="fa-solid fa-list-check"></i> Menu Items (comma separated)</label>
+              <input type="text" id="items" placeholder="e.g. Paneer Butter Masala, Roti, Jeera Rice, Gulab Jamun" required />
+              <small class="form-hint">Separate items with commas to render item tags automatically.</small>
+            </div>
+
+            <button type="submit" class="btn btn-accent btn-block">
+              <i class="fa-solid fa-plus"></i> Publish Menu Entry
+            </button>
+          </form>
+        </section>
+
+        <!-- Manage Existing Menu Items Card -->
+        <section class="card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-list-ul"></i> Manage Menu Entries</h3>
+          </div>
+          <div id="adminMenuList" class="admin-menu-list">
+            <div class="loading-state">
+              <i class="fa-solid fa-circle-notch fa-spin"></i>
+              <p>Loading menu items...</p>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Feedback Summary & Analytics Section -->
+      <section class="card full-width-card">
+        <div class="card-header">
+          <div>
+            <h3><i class="fa-solid fa-chart-bar"></i> Feedback Analytics & Rating Breakdown</h3>
+            <p class="section-desc">Average ratings and response counts submitted by hostel students.</p>
+          </div>
+          <button id="refreshSummaryBtn" class="btn btn-secondary btn-sm">
+            <i class="fa-solid fa-rotate"></i> Refresh Summary
+          </button>
+        </div>
+        <div id="summaryList" class="summary-grid">
+          <div class="loading-state">
+            <i class="fa-solid fa-chart-line"></i>
+            <p>Click refresh or wait for analytics data to load...</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+  </main>
+
+  <!-- Comments Modal -->
+  <div id="commentsModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalMealTitle"><i class="fa-solid fa-comments"></i> Student Feedback Comments</h3>
+        <button id="closeModalBtn" class="icon-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" id="modalCommentsContainer">
+        <p class="loading-state">Loading comments...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Toast Notifications Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
