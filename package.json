@@ -4,6 +4,7 @@
   "description": "Backend REST API for Mess Menu & Feedback System",
   "main": "server.js",
   "scripts": {
+    "build": "echo Static site build complete",
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
