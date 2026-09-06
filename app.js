@@ -20,10 +20,15 @@ const themeToggleBtn = document.getElementById("themeToggleBtn");
 
 // Login Elements
 const loginOverlay = document.getElementById("loginOverlay");
+const loginSubtitle = document.getElementById("loginSubtitle");
 const loginForm = document.getElementById("loginForm");
 const roleStudentBtn = document.getElementById("roleStudentBtn");
 const roleAdminBtn = document.getElementById("roleAdminBtn");
-const adminPassGroup = document.getElementById("adminPassGroup");
+const studentFieldsGroup = document.getElementById("studentFieldsGroup");
+const adminFieldsGroup = document.getElementById("adminFieldsGroup");
+const loginNameInput = document.getElementById("loginName");
+const loginRegNoInput = document.getElementById("loginRegNo");
+const loginPhoneInput = document.getElementById("loginPhone");
 const adminPasscode = document.getElementById("adminPasscode");
 
 // User Profile Pill Elements
@@ -83,36 +88,47 @@ roleStudentBtn.addEventListener("click", () => {
   activeLoginRole = "student";
   roleStudentBtn.classList.add("active");
   roleAdminBtn.classList.remove("active");
-  adminPassGroup.classList.add("hidden");
+  studentFieldsGroup.classList.remove("hidden");
+  adminFieldsGroup.classList.add("hidden");
+  loginSubtitle.textContent = "Please sign in with your student details to continue";
 });
 
 roleAdminBtn.addEventListener("click", () => {
   activeLoginRole = "admin";
   roleAdminBtn.classList.add("active");
   roleStudentBtn.classList.remove("active");
-  adminPassGroup.classList.remove("hidden");
+  studentFieldsGroup.classList.add("hidden");
+  adminFieldsGroup.classList.remove("hidden");
+  loginSubtitle.textContent = "Enter admin security password to access portal";
 });
 
 loginForm.addEventListener("submit", (e) => {
   e.preventDefault();
 
-  const name = document.getElementById("loginName").value.trim();
-  const regNo = document.getElementById("loginRegNo").value.trim();
-  const phoneNo = document.getElementById("loginPhone").value.trim();
+  if (activeLoginRole === "student") {
+    const name = loginNameInput.value.trim();
+    const regNo = loginRegNoInput.value.trim();
+    const phoneNo = loginPhoneInput.value.trim();
 
-  if (activeLoginRole === "admin") {
-    const pin = adminPasscode.value.trim();
-    if (pin !== "admin123" && pin !== "") {
-      showToast("Invalid Admin PIN! Use default: admin123", "error");
+    if (!name || !regNo || !phoneNo) {
+      showToast("Please fill in Name, Reg No, and Phone Number!", "error");
       return;
     }
+
+    currentUser = { name, regNo, phoneNo, role: "student" };
+  } else {
+    const pin = adminPasscode.value.trim();
+    if (pin !== "admin123" && pin !== "") {
+      showToast("Invalid Admin Password! Default is: admin123", "error");
+      return;
+    }
+
+    currentUser = { name: "System Admin", regNo: "ADMIN", phoneNo: "N/A", role: "admin" };
   }
 
-  currentUser = { name, regNo, phoneNo, role: activeLoginRole };
   localStorage.setItem("messhub_session", JSON.stringify(currentUser));
-
   loginOverlay.classList.add("hidden");
-  showToast(`Welcome back, ${name}! (${activeLoginRole.toUpperCase()})`, "success");
+  showToast(`Welcome back, ${currentUser.name}!`, "success");
   
   applyUserSession();
 });
@@ -121,6 +137,10 @@ function applyUserSession() {
   if (!currentUser) {
     loginOverlay.classList.remove("hidden");
     userProfilePill.classList.add("hidden");
+    studentTabBtn.classList.add("hidden");
+    adminTabBtn.classList.add("hidden");
+    studentView.classList.add("hidden");
+    adminView.classList.add("hidden");
     return;
   }
 
@@ -130,17 +150,42 @@ function applyUserSession() {
   // Populate Header Profile Pill
   userAvatar.textContent = (currentUser.name || "U")[0].toUpperCase();
   profileName.textContent = currentUser.name;
-  profileSub.textContent = `${currentUser.role.toUpperCase()} • ${currentUser.regNo}`;
+  profileSub.textContent = `${currentUser.role.toUpperCase()}${currentUser.role === 'student' ? ' • ' + currentUser.regNo : ''}`;
 
-  // Pre-fill Student Feedback Form
-  studentNameInput.value = currentUser.name;
-  rollNoInput.value = currentUser.regNo;
-
-  // View navigation per role
+  // Strict Role Access Control & Tab Visibility
   if (currentUser.role === "admin") {
-    switchToAdminView();
+    // Admin ONLY access: Show Admin tab & Admin view, HIDE Student tab & Student view
+    adminTabBtn.classList.remove("hidden");
+    adminTabBtn.classList.add("active");
+
+    studentTabBtn.classList.add("hidden");
+    studentTabBtn.classList.remove("active");
+
+    adminView.classList.remove("hidden");
+    adminView.classList.add("active");
+
+    studentView.classList.add("hidden");
+    studentView.classList.remove("active");
+
+    loadAdminMenuList();
+    loadSummary();
   } else {
-    switchToStudentView();
+    // Student ONLY access: Show Student tab & Student view, HIDE Admin tab completely!
+    studentTabBtn.classList.remove("hidden");
+    studentTabBtn.classList.add("active");
+
+    adminTabBtn.classList.add("hidden");
+    adminTabBtn.classList.remove("active");
+
+    studentView.classList.remove("hidden");
+    studentView.classList.add("active");
+
+    adminView.classList.add("hidden");
+    adminView.classList.remove("active");
+
+    // Auto-fill Student Feedback Form
+    studentNameInput.value = currentUser.name;
+    rollNoInput.value = currentUser.regNo;
   }
 }
 
@@ -151,6 +196,10 @@ logoutBtn.addEventListener("click", () => {
   loginForm.reset();
   loginOverlay.classList.remove("hidden");
   userProfilePill.classList.add("hidden");
+  studentTabBtn.classList.add("hidden");
+  adminTabBtn.classList.add("hidden");
+  studentView.classList.add("hidden");
+  adminView.classList.add("hidden");
   showToast("Logged out successfully.", "success");
 });
 
@@ -164,47 +213,24 @@ if (savedSession) {
   }
 }
 
-// ==================== TAB NAVIGATION ====================
+// Tab Click Handlers
 studentTabBtn.addEventListener("click", () => {
-  switchToStudentView();
+  if (currentUser && currentUser.role === "student") {
+    studentView.classList.remove("hidden");
+    studentView.classList.add("active");
+    adminView.classList.add("hidden");
+  }
 });
 
 adminTabBtn.addEventListener("click", () => {
-  if (currentUser && currentUser.role !== "admin") {
-    showToast("Access Restricted: Switch to Admin role to view dashboard.", "error");
-    // Show login screen with Admin role active
-    activeLoginRole = "admin";
-    roleAdminBtn.classList.add("active");
-    roleStudentBtn.classList.remove("active");
-    adminPassGroup.classList.remove("hidden");
-    loginOverlay.classList.remove("hidden");
-    return;
+  if (currentUser && currentUser.role === "admin") {
+    adminView.classList.remove("hidden");
+    adminView.classList.add("active");
+    studentView.classList.add("hidden");
+    loadAdminMenuList();
+    loadSummary();
   }
-  switchToAdminView();
 });
-
-function switchToStudentView() {
-  studentView.classList.add("active");
-  studentView.classList.remove("hidden");
-  adminView.classList.remove("active");
-  adminView.classList.add("hidden");
-
-  studentTabBtn.classList.add("active");
-  adminTabBtn.classList.remove("active");
-}
-
-function switchToAdminView() {
-  adminView.classList.add("active");
-  adminView.classList.remove("hidden");
-  studentView.classList.remove("active");
-  studentView.classList.add("hidden");
-
-  adminTabBtn.classList.add("active");
-  studentTabBtn.classList.remove("active");
-
-  loadAdminMenuList();
-  loadSummary();
-}
 
 // ==================== TOAST NOTIFICATION UTILITY ====================
 function showToast(message, type = "success") {
@@ -641,4 +667,3 @@ commentsModal.addEventListener("click", (e) => {
 // ==================== INITIALIZATION ====================
 applyUserSession();
 loadMenu();
-loadSummary();

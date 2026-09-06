@@ -35,7 +35,7 @@
         <button id="studentTabBtn" class="tab-btn active">
           <i class="fa-solid fa-graduation-cap"></i> Student View
         </button>
-        <button id="adminTabBtn" class="tab-btn">
+        <button id="adminTabBtn" class="tab-btn hidden">
           <i class="fa-solid fa-chart-pie"></i> Admin Portal
         </button>
       </nav>
@@ -46,7 +46,7 @@
           <div class="user-avatar" id="userAvatar">U</div>
           <div class="user-info">
             <span class="user-name" id="profileName">User</span>
-            <span class="user-sub" id="profileSub">Role &bull; RegNo</span>
+            <span class="user-sub" id="profileSub">Role</span>
           </div>
           <button id="logoutBtn" class="btn-logout" title="Logout">
             <i class="fa-solid fa-right-from-bracket"></i>
@@ -67,7 +67,7 @@
       <div class="login-header">
         <div class="login-brand-icon"><i class="fa-solid fa-shield-halved"></i></div>
         <h2>Welcome to MessHub</h2>
-        <p>Please log in with your details to access mess menu & feedback</p>
+        <p id="loginSubtitle">Please sign in with your student details to continue</p>
       </div>
 
       <!-- Role Selector Toggle -->
@@ -81,29 +81,34 @@
       </div>
 
       <form id="loginForm" class="styled-form">
-        <div class="form-group">
-          <label for="loginName"><i class="fa-solid fa-user"></i> Full Name</label>
-          <input type="text" id="loginName" placeholder="e.g. Vibhuti Sharma" required />
+        <!-- Student Login Fields -->
+        <div id="studentFieldsGroup">
+          <div class="form-group">
+            <label for="loginName"><i class="fa-solid fa-user"></i> Full Name</label>
+            <input type="text" id="loginName" placeholder="e.g. Vibhuti Sharma" />
+          </div>
+
+          <div class="form-group" style="margin-top: 12px;">
+            <label for="loginRegNo"><i class="fa-solid fa-id-card"></i> Registration / Roll Number</label>
+            <input type="text" id="loginRegNo" placeholder="e.g. 21BCE1234" />
+          </div>
+
+          <div class="form-group" style="margin-top: 12px;">
+            <label for="loginPhone"><i class="fa-solid fa-phone"></i> Phone Number</label>
+            <input type="tel" id="loginPhone" placeholder="e.g. +91 9876543210" pattern="[0-9+\s\-]{10,15}" />
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="loginRegNo"><i class="fa-solid fa-id-card"></i> Registration / Roll Number</label>
-          <input type="text" id="loginRegNo" placeholder="e.g. 21BCE1234" required />
+        <!-- Admin Login Fields (Password Only) -->
+        <div id="adminFieldsGroup" class="hidden">
+          <div class="form-group">
+            <label for="adminPasscode"><i class="fa-solid fa-key"></i> Admin Security Password</label>
+            <input type="password" id="adminPasscode" placeholder="Enter admin password (default: admin123)" />
+            <small class="form-hint">Default Admin Password: <code>admin123</code></small>
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="loginPhone"><i class="fa-solid fa-phone"></i> Phone Number</label>
-          <input type="tel" id="loginPhone" placeholder="e.g. +91 9876543210" pattern="[0-9+\s\-]{10,15}" required />
-        </div>
-
-        <!-- Admin Passcode Field (Shown when Admin Role is Active) -->
-        <div class="form-group hidden" id="adminPassGroup">
-          <label for="adminPasscode"><i class="fa-solid fa-key"></i> Admin Security PIN</label>
-          <input type="password" id="adminPasscode" placeholder="Enter admin PIN (default: admin123)" />
-          <small class="form-hint">Default Admin PIN: <code>admin123</code></small>
-        </div>
-
-        <button type="submit" class="btn btn-primary btn-block btn-login">
+        <button type="submit" class="btn btn-primary btn-block btn-login" style="margin-top: 16px;">
           <i class="fa-solid fa-right-to-bracket"></i> Sign In to Portal
         </button>
       </form>
@@ -113,7 +118,7 @@
   <!-- Main Content Container -->
   <main class="main-layout">
 
-    <!-- ===================== STUDENT VIEW ===================== -->
+    <!-- ===================== STUDENT VIEW (Accessible ONLY to Students) ===================== -->
     <div id="studentView" class="view-content active">
       <!-- Hero Banner -->
       <section class="hero-card card">
@@ -217,7 +222,7 @@
       </div>
     </div>
 
-    <!-- ===================== ADMIN VIEW ===================== -->
+    <!-- ===================== ADMIN VIEW (Accessible ONLY to Admins) ===================== -->
     <div id="adminView" class="view-content hidden">
       <!-- Admin Overview Stats -->
       <section class="admin-kpi-grid">
