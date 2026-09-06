@@ -11,18 +11,28 @@ const app = express();
 // Connect to MongoDB Atlas
 connectDB();
 
+const path = require('path');
+
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Health check route (useful to confirm deployment worked)
-app.get('/', (req, res) => {
+// Serve static frontend files (index.html, style.css, app.js)
+app.use(express.static(__dirname));
+
+// Health check API route
+app.get('/api/health', (req, res) => {
   res.json({ message: 'Mess Feedback API is running' });
 });
 
 // API routes
 app.use('/api/menu', menuRoutes);
 app.use('/api/feedback', feedbackRoutes);
+
+// Serve index.html for root route
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 // 404 handler
 app.use((req, res) => {
