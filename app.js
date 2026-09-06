@@ -8,6 +8,8 @@ const API_BASE_URL = "https://mess-feedback-backend-1z0s.onrender.com";
 let allMenus = [];
 let selectedDayFilter = "All";
 let selectedStarRating = 0;
+let currentUser = null; // { name, regNo, phoneNo, role: 'student'|'admin' }
+let activeLoginRole = "student"; // 'student' | 'admin'
 
 // ==================== DOM ELEMENTS ====================
 const studentTabBtn = document.getElementById("studentTabBtn");
@@ -16,12 +18,30 @@ const studentView = document.getElementById("studentView");
 const adminView = document.getElementById("adminView");
 const themeToggleBtn = document.getElementById("themeToggleBtn");
 
+// Login Elements
+const loginOverlay = document.getElementById("loginOverlay");
+const loginForm = document.getElementById("loginForm");
+const roleStudentBtn = document.getElementById("roleStudentBtn");
+const roleAdminBtn = document.getElementById("roleAdminBtn");
+const adminPassGroup = document.getElementById("adminPassGroup");
+const adminPasscode = document.getElementById("adminPasscode");
+
+// User Profile Pill Elements
+const userProfilePill = document.getElementById("userProfilePill");
+const userAvatar = document.getElementById("userAvatar");
+const profileName = document.getElementById("profileName");
+const profileSub = document.getElementById("profileSub");
+const logoutBtn = document.getElementById("logoutBtn");
+
+// Student View Elements
 const dayFilterPills = document.getElementById("dayFilterPills");
 const menuListEl = document.getElementById("menuList");
 const menuSelectEl = document.getElementById("menuSelect");
 const refreshMenuBtn = document.getElementById("refreshMenuBtn");
 
 const feedbackForm = document.getElementById("feedbackForm");
+const studentNameInput = document.getElementById("studentName");
+const rollNoInput = document.getElementById("rollNo");
 const starPicker = document.getElementById("starPicker");
 const ratingInput = document.getElementById("rating");
 const ratingTextDisplay = document.getElementById("ratingTextDisplay");
@@ -58,8 +78,112 @@ const savedTheme = localStorage.getItem("messhub_theme") || "dark";
 document.documentElement.setAttribute("data-theme", savedTheme);
 themeToggleBtn.innerHTML = savedTheme === "dark" ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
 
+// ==================== LOGIN & ROLE SELECTOR ====================
+roleStudentBtn.addEventListener("click", () => {
+  activeLoginRole = "student";
+  roleStudentBtn.classList.add("active");
+  roleAdminBtn.classList.remove("active");
+  adminPassGroup.classList.add("hidden");
+});
+
+roleAdminBtn.addEventListener("click", () => {
+  activeLoginRole = "admin";
+  roleAdminBtn.classList.add("active");
+  roleStudentBtn.classList.remove("active");
+  adminPassGroup.classList.remove("hidden");
+});
+
+loginForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  const name = document.getElementById("loginName").value.trim();
+  const regNo = document.getElementById("loginRegNo").value.trim();
+  const phoneNo = document.getElementById("loginPhone").value.trim();
+
+  if (activeLoginRole === "admin") {
+    const pin = adminPasscode.value.trim();
+    if (pin !== "admin123" && pin !== "") {
+      showToast("Invalid Admin PIN! Use default: admin123", "error");
+      return;
+    }
+  }
+
+  currentUser = { name, regNo, phoneNo, role: activeLoginRole };
+  localStorage.setItem("messhub_session", JSON.stringify(currentUser));
+
+  loginOverlay.classList.add("hidden");
+  showToast(`Welcome back, ${name}! (${activeLoginRole.toUpperCase()})`, "success");
+  
+  applyUserSession();
+});
+
+function applyUserSession() {
+  if (!currentUser) {
+    loginOverlay.classList.remove("hidden");
+    userProfilePill.classList.add("hidden");
+    return;
+  }
+
+  loginOverlay.classList.add("hidden");
+  userProfilePill.classList.remove("hidden");
+
+  // Populate Header Profile Pill
+  userAvatar.textContent = (currentUser.name || "U")[0].toUpperCase();
+  profileName.textContent = currentUser.name;
+  profileSub.textContent = `${currentUser.role.toUpperCase()} • ${currentUser.regNo}`;
+
+  // Pre-fill Student Feedback Form
+  studentNameInput.value = currentUser.name;
+  rollNoInput.value = currentUser.regNo;
+
+  // View navigation per role
+  if (currentUser.role === "admin") {
+    switchToAdminView();
+  } else {
+    switchToStudentView();
+  }
+}
+
+// Logout Action
+logoutBtn.addEventListener("click", () => {
+  currentUser = null;
+  localStorage.removeItem("messhub_session");
+  loginForm.reset();
+  loginOverlay.classList.remove("hidden");
+  userProfilePill.classList.add("hidden");
+  showToast("Logged out successfully.", "success");
+});
+
+// Check saved session on startup
+const savedSession = localStorage.getItem("messhub_session");
+if (savedSession) {
+  try {
+    currentUser = JSON.parse(savedSession);
+  } catch (err) {
+    currentUser = null;
+  }
+}
+
 // ==================== TAB NAVIGATION ====================
 studentTabBtn.addEventListener("click", () => {
+  switchToStudentView();
+});
+
+adminTabBtn.addEventListener("click", () => {
+  if (currentUser && currentUser.role !== "admin") {
+    showToast("Access Restricted: Switch to Admin role to view dashboard.", "error");
+    // Show login screen with Admin role active
+    activeLoginRole = "admin";
+    roleAdminBtn.classList.add("active");
+    roleStudentBtn.classList.remove("active");
+    adminPassGroup.classList.remove("hidden");
+    loginOverlay.classList.remove("hidden");
+    return;
+  }
+  switchToAdminView();
+});
+
+function switchToStudentView() {
   studentView.classList.add("active");
   studentView.classList.remove("hidden");
   adminView.classList.remove("active");
@@ -67,9 +191,9 @@ studentTabBtn.addEventListener("click", () => {
 
   studentTabBtn.classList.add("active");
   adminTabBtn.classList.remove("active");
-});
+}
 
-adminTabBtn.addEventListener("click", () => {
+function switchToAdminView() {
   adminView.classList.add("active");
   adminView.classList.remove("hidden");
   studentView.classList.remove("active");
@@ -78,10 +202,9 @@ adminTabBtn.addEventListener("click", () => {
   adminTabBtn.classList.add("active");
   studentTabBtn.classList.remove("active");
 
-  // Refresh admin summary & menu list on tab switch
   loadAdminMenuList();
   loadSummary();
-});
+}
 
 // ==================== TOAST NOTIFICATION UTILITY ====================
 function showToast(message, type = "success") {
@@ -260,8 +383,8 @@ feedbackForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const menuId = menuSelectEl.value;
-  const studentName = document.getElementById("studentName").value.trim();
-  const rollNo = document.getElementById("rollNo").value.trim();
+  const studentName = studentNameInput.value.trim();
+  const rollNo = rollNoInput.value.trim();
   const rating = ratingInput.value;
   const comment = document.getElementById("comment").value.trim();
 
@@ -287,7 +410,8 @@ feedbackForm.addEventListener("submit", async (e) => {
     }
 
     showToast("Feedback submitted successfully. Thank you!", "success");
-    feedbackForm.reset();
+    document.getElementById("comment").value = "";
+    menuSelectEl.value = "";
     resetStarRating();
     loadSummary(); // refresh background summary
   } catch (err) {
@@ -515,5 +639,6 @@ commentsModal.addEventListener("click", (e) => {
 });
 
 // ==================== INITIALIZATION ====================
+applyUserSession();
 loadMenu();
 loadSummary();

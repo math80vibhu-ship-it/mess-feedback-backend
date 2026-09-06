@@ -6,7 +6,7 @@
   --bg-body: #0b0f19;
   --bg-glow-1: rgba(255, 107, 0, 0.15);
   --bg-glow-2: rgba(99, 102, 241, 0.12);
-  --card-bg: rgba(20, 28, 45, 0.7);
+  --card-bg: rgba(20, 28, 45, 0.75);
   --card-bg-solid: #141c2d;
   --card-border: rgba(255, 255, 255, 0.08);
   --card-hover-border: rgba(255, 107, 0, 0.3);
@@ -72,6 +72,10 @@ body {
   overflow-x: hidden;
   line-height: 1.5;
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.hidden {
+  display: none !important;
 }
 
 /* Background Ambient Glow Effects */
@@ -199,6 +203,67 @@ body {
   box-shadow: 0 4px 15px rgba(255, 107, 0, 0.3);
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Logged-In User Profile Pill */
+.user-profile-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--card-bg-solid);
+  border: 1px solid var(--card-border);
+  padding: 4px 12px 4px 6px;
+  border-radius: 30px;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--primary-gradient);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.user-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.user-sub {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.btn-logout {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 4px;
+  border-radius: 50%;
+  transition: var(--transition);
+}
+
+.btn-logout:hover {
+  color: var(--danger);
+}
+
 /* Theme Toggle Button */
 .icon-btn {
   background: rgba(255, 255, 255, 0.06);
@@ -219,6 +284,104 @@ body {
   color: white;
   border-color: var(--primary);
   transform: rotate(15deg);
+}
+
+/* Login Modal Screen Overlay */
+.login-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(11, 15, 25, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 450px;
+  background: var(--card-bg-solid);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 32px 28px;
+  box-shadow: var(--shadow-md);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.login-brand-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  background: var(--primary-gradient);
+  color: white;
+  font-size: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px auto;
+  box-shadow: 0 6px 20px rgba(255, 107, 0, 0.35);
+}
+
+.login-header h2 {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.login-header p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.role-selector {
+  display: flex;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--card-border);
+  border-radius: 30px;
+  padding: 4px;
+  margin-bottom: 20px;
+}
+
+.role-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 8px 12px;
+  border-radius: 25px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: var(--font-main);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: var(--transition);
+}
+
+.role-btn.active {
+  background: var(--primary-gradient);
+  color: white;
+  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+}
+
+.btn-login {
+  margin-top: 8px;
+  padding: 12px;
+  font-size: 1rem;
 }
 
 /* Layout Containers */
@@ -768,7 +931,6 @@ body {
 /* Admin Menu List */
 .admin-menu-list {
   display: flex;
-  flex-direction: flex-direction;
   flex-direction: column;
   gap: 12px;
   max-height: 380px;
@@ -1007,7 +1169,7 @@ body {
   position: fixed;
   bottom: 24px;
   right: 24px;
-  z-index: 300;
+  z-index: 600;
   display: flex;
   flex-direction: column;
   gap: 10px;

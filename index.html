@@ -23,7 +23,7 @@
     <div class="header-container">
       <div class="brand">
         <div class="brand-icon">
-          <i class="fa-solid => fa-utensils"></i>
+          <i class="fa-solid fa-utensils"></i>
         </div>
         <div class="brand-text">
           <h1>Mess<span>Hub</span></h1>
@@ -31,7 +31,7 @@
         </div>
       </div>
 
-      <nav class="nav-tabs">
+      <nav class="nav-tabs" id="mainNavTabs">
         <button id="studentTabBtn" class="tab-btn active">
           <i class="fa-solid fa-graduation-cap"></i> Student View
         </button>
@@ -41,12 +41,74 @@
       </nav>
 
       <div class="header-actions">
+        <!-- User Profile Pill (Visible when Logged In) -->
+        <div id="userProfilePill" class="user-profile-pill hidden">
+          <div class="user-avatar" id="userAvatar">U</div>
+          <div class="user-info">
+            <span class="user-name" id="profileName">User</span>
+            <span class="user-sub" id="profileSub">Role &bull; RegNo</span>
+          </div>
+          <button id="logoutBtn" class="btn-logout" title="Logout">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </button>
+        </div>
+
+        <!-- Theme Toggle Button -->
         <button id="themeToggleBtn" class="icon-btn" title="Toggle Light/Dark Theme">
           <i class="fa-solid fa-moon"></i>
         </button>
       </div>
     </div>
   </header>
+
+  <!-- Login Modal / Screen Overlay -->
+  <div id="loginOverlay" class="login-overlay">
+    <div class="login-card card">
+      <div class="login-header">
+        <div class="login-brand-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <h2>Welcome to MessHub</h2>
+        <p>Please log in with your details to access mess menu & feedback</p>
+      </div>
+
+      <!-- Role Selector Toggle -->
+      <div class="role-selector">
+        <button type="button" class="role-btn active" id="roleStudentBtn">
+          <i class="fa-solid fa-graduation-cap"></i> Student Login
+        </button>
+        <button type="button" class="role-btn" id="roleAdminBtn">
+          <i class="fa-solid fa-user-gear"></i> Admin Login
+        </button>
+      </div>
+
+      <form id="loginForm" class="styled-form">
+        <div class="form-group">
+          <label for="loginName"><i class="fa-solid fa-user"></i> Full Name</label>
+          <input type="text" id="loginName" placeholder="e.g. Vibhuti Sharma" required />
+        </div>
+
+        <div class="form-group">
+          <label for="loginRegNo"><i class="fa-solid fa-id-card"></i> Registration / Roll Number</label>
+          <input type="text" id="loginRegNo" placeholder="e.g. 21BCE1234" required />
+        </div>
+
+        <div class="form-group">
+          <label for="loginPhone"><i class="fa-solid fa-phone"></i> Phone Number</label>
+          <input type="tel" id="loginPhone" placeholder="e.g. +91 9876543210" pattern="[0-9+\s\-]{10,15}" required />
+        </div>
+
+        <!-- Admin Passcode Field (Shown when Admin Role is Active) -->
+        <div class="form-group hidden" id="adminPassGroup">
+          <label for="adminPasscode"><i class="fa-solid fa-key"></i> Admin Security PIN</label>
+          <input type="password" id="adminPasscode" placeholder="Enter admin PIN (default: admin123)" />
+          <small class="form-hint">Default Admin PIN: <code>admin123</code></small>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-login">
+          <i class="fa-solid fa-right-to-bracket"></i> Sign In to Portal
+        </button>
+      </form>
+    </div>
+  </div>
 
   <!-- Main Content Container -->
   <main class="main-layout">
@@ -121,11 +183,11 @@
             <div class="form-row">
               <div class="form-group">
                 <label for="studentName"><i class="fa-solid fa-user"></i> Your Name</label>
-                <input type="text" id="studentName" placeholder="e.g. Vibhuti" required />
+                <input type="text" id="studentName" placeholder="e.g. Vibhuti" required readonly style="background: rgba(255, 255, 255, 0.05); cursor: not-allowed;" />
               </div>
               <div class="form-group">
-                <label for="rollNo"><i class="fa-solid fa-id-card"></i> Roll / ID Number</label>
-                <input type="text" id="rollNo" placeholder="e.g. 21BCE1234" required />
+                <label for="rollNo"><i class="fa-solid fa-id-card"></i> Registration / Roll Number</label>
+                <input type="text" id="rollNo" placeholder="e.g. 21BCE1234" required readonly style="background: rgba(255, 255, 255, 0.05); cursor: not-allowed;" />
               </div>
             </div>
 
