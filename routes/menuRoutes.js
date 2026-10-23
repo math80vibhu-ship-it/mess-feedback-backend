@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const Menu = require('../models/Menu');
+const { protect, authorize } = require('../middleware/auth');
 
 // @route   POST /api/menu
-// @desc    Create a new menu entry (admin)
-router.post('/', async (req, res) => {
+// @desc    Create a new menu entry (admin / supervisor only)
+router.post('/', protect, authorize('admin', 'supervisor'), async (req, res) => {
   try {
     const { day, mealType, items, date } = req.body;
 
@@ -21,7 +22,7 @@ router.post('/', async (req, res) => {
 });
 
 // @route   GET /api/menu
-// @desc    Get all menu entries (optionally filter by day via ?day=Monday)
+// @desc    Get all menu entries (Public - student and all users)
 router.get('/', async (req, res) => {
   try {
     const filter = {};
@@ -47,8 +48,8 @@ router.get('/:id', async (req, res) => {
 });
 
 // @route   PUT /api/menu/:id
-// @desc    Update a menu entry (admin)
-router.put('/:id', async (req, res) => {
+// @desc    Update a menu entry (Restricted: admin / supervisor only with valid token - Question 2b)
+router.put('/:id', protect, authorize('admin', 'supervisor'), async (req, res) => {
   try {
     const updatedMenu = await Menu.findByIdAndUpdate(
       req.params.id,
@@ -56,19 +57,27 @@ router.put('/:id', async (req, res) => {
       { new: true, runValidators: true }
     );
     if (!updatedMenu) return res.status(404).json({ message: 'Menu entry not found' });
-    res.json(updatedMenu);
+    res.json({
+      success: true,
+      message: 'Menu entry successfully updated',
+      data: updatedMenu,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
 // @route   DELETE /api/menu/:id
-// @desc    Delete a menu entry (admin)
-router.delete('/:id', async (req, res) => {
+// @desc    Delete a menu entry (Restricted: admin / supervisor only with valid token - Question 2b)
+router.delete('/:id', protect, authorize('admin', 'supervisor'), async (req, res) => {
   try {
     const deletedMenu = await Menu.findByIdAndDelete(req.params.id);
     if (!deletedMenu) return res.status(404).json({ message: 'Menu entry not found' });
-    res.json({ message: 'Menu entry deleted successfully' });
+    res.json({
+      success: true,
+      message: 'Menu entry deleted successfully',
+      deletedId: req.params.id,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

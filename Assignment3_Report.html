@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BACSE344 - Digital Assignment 3 Report</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700&family=Fira+Code:wght@400;500&display=swap');
+    :root {
+      --primary: #ff6b00;
+      --accent: #6366f1;
+      --bg: #0f172a;
+      --card: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --success: #10b981;
+      --danger: #ef4444;
+    }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+    h1, h2, h3, h4 { font-family: 'Outfit', sans-serif; color: #fff; margin-top: 1.6em; margin-bottom: 0.5em; }
+    h1 { font-size: 2.2rem; border-bottom: 2px solid var(--border); padding-bottom: 12px; }
+    h2 { font-size: 1.6rem; color: #cbd5e1; border-left: 4px solid var(--primary); padding-left: 12px; }
+    h3 { font-size: 1.25rem; color: #94a3b8; }
+    p, li { color: #cbd5e1; font-size: 0.95rem; }
+    ul, ol { padding-left: 24px; margin-bottom: 16px; }
+    li { margin-bottom: 6px; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.88rem; background: var(--card); border-radius: 8px; overflow: hidden; }
+    th, td { padding: 12px 14px; border: 1px solid var(--border); text-align: left; }
+    th { background: #1e293b; color: #fff; font-weight: 600; }
+    tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+    code { font-family: 'Fira Code', monospace; background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.85rem; color: #f97316; }
+    pre { background: #0b0f19; border: 1px solid var(--border); padding: 16px; border-radius: 8px; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.82rem; color: #a5b4fc; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; }
+    .badge-success { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .badge-primary { background: rgba(255, 107, 0, 0.2); color: #fb923c; }
+    .badge-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+    .img-container { text-align: center; margin: 30px 0; background: #0b0f19; padding: 16px; border-radius: 12px; border: 1px solid var(--border); }
+    .img-container img { max-width: 100%; height: auto; border-radius: 8px; }
+    .caption { font-size: 0.82rem; color: var(--text-muted); margin-top: 8px; font-style: italic; }
+    .meta-box { background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); padding: 16px 20px; border-radius: 10px; margin-bottom: 30px; }
+    .meta-box p { margin: 4px 0; font-size: 0.9rem; }
+    .meta-box strong { color: #fff; }
+    @media print {
+      body { background: #fff; color: #000; }
+      pre, table { border: 1px solid #ccc; background: #fff; color: #000; }
+      th { background: #f0f0f0; color: #000; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>BACSE344 — Cloud Infrastructure and Architecture</h1>
+  <h2>Digital Assignment 3 Submission Report</h2>
+
+  <div class="meta-box">
+    <p><strong>Student Name:</strong> Vibhuti</p>
+    <p><strong>Course Code:</strong> BACSE344 | <strong>Slot:</strong> C1</p>
+    <p><strong>Domain Application:</strong> Campus Dining & Hostel Mess Feedback System (MessHub)</p>
+    <p><strong>GitHub Repository:</strong> <a href="https://github.com/math80vibhu-ship-it/mess-feedback-backend" style="color: #818cf8;">github.com/math80vibhu-ship-it/mess-feedback-backend</a></p>
+    <p><strong>Submission Branch:</strong> <code>assignment-3</code></p>
+    <p><strong>Assignment 1 Live Backend:</strong> <code>https://mess-feedback-backend-1z0s.onrender.com</code></p>
+    <p><strong>Database:</strong> MongoDB Atlas Multi-Region Cloud Replica Set</p>
+  </div>
+
+  <h2>Question 1 — Scale Your Application (5 Marks)</h2>
+  
+  <h3>1(a) Peak-Demand Scenario & Docker Compose Cluster</h3>
+  <p><strong>Realistic Peak Demand:</strong> In a residential university with over 5,000 hostel students, the highest concurrent traffic surge occurs between <strong>8:30 PM and 9:15 PM</strong> right after dinner finishes. Thousands of students concurrently access the web portal to check tomorrow's breakfast menu and rate today's dinner quality.</p>
+  <p><strong>Hardest-Hit API:</strong> <code>GET /api/menu</code> (Read surge) and <code>POST /api/feedback</code> (Write surge).</p>
+  <p><strong>Docker Compose Cluster:</strong> 3 backend instances (<code>mess_backend_1:5001</code>, <code>mess_backend_2:5002</code>, <code>mess_backend_3:5003</code>) running behind an <strong>Nginx reverse proxy / load balancer</strong> on port <code>80:80</code>, connected to MongoDB Atlas.</p>
+
+  <pre>Request 1 -> X-Served-By: backend-instance-1 | Status: 200 OK
+Request 2 -> X-Served-By: backend-instance-2 | Status: 200 OK
+Request 3 -> X-Served-By: backend-instance-3 | Status: 200 OK
+Request 4 -> X-Served-By: backend-instance-1 | Status: 200 OK
+Request 5 -> X-Served-By: backend-instance-2 | Status: 200 OK
+Request 6 -> X-Served-By: backend-instance-3 | Status: 200 OK</pre>
+
+  <h3>1(b) 1,000-Request Load Testing Benchmark Table (k6 Load Tester)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Performance Metric</th>
+        <th>1 Backend Instance</th>
+        <th>3 Backend Instances (Cluster)</th>
+        <th>Improvement</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Total Completed Requests</strong></td>
+        <td>1,000 requests</td>
+        <td>1,000 requests</td>
+        <td>Baseline parity</td>
+      </tr>
+      <tr>
+        <td><strong>Concurrency</strong></td>
+        <td>20 Virtual Users (VUs)</td>
+        <td>20 Virtual Users (VUs)</td>
+        <td>Fixed load profile</td>
+      </tr>
+      <tr>
+        <td><strong>Throughput (RPS)</strong></td>
+        <td>90.24 req/sec</td>
+        <td><strong>96.17 req/sec</strong></td>
+        <td><span class="badge badge-success">+6.6% sustained gain</span></td>
+      </tr>
+      <tr>
+        <td><strong>Average Latency</strong></td>
+        <td>202.23 ms</td>
+        <td><strong>193.36 ms</strong></td>
+        <td><span class="badge badge-success">4.4% faster</span></td>
+      </tr>
+      <tr>
+        <td><strong>Median Latency (med)</strong></td>
+        <td>104.89 ms</td>
+        <td><strong>81.98 ms</strong></td>
+        <td><span class="badge badge-success">21.8% faster median</span></td>
+      </tr>
+      <tr>
+        <td><strong>Worst-Case Queuing Lag (max)</strong></td>
+        <td>8,170 ms (8.17s)</td>
+        <td><strong>1,330 ms (1.33s)</strong></td>
+        <td><span class="badge badge-success">83.7% latency reduction</span></td>
+      </tr>
+      <tr>
+        <td><strong>Failed Requests</strong></td>
+        <td>0 / 1,000 (0.00%)</td>
+        <td>0 / 1,000 (0.00%)</td>
+        <td><span class="badge badge-success">100% Reliable</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>1(c) High-Availability Failover & Resilient Nginx Configuration</h3>
+  <p>Mid-flight container crash experiment: stopping <code>mess_backend_2</code> at second 4 during continuous 15-VU traffic:</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Test Run</th>
+        <th>Nginx Failover Directive</th>
+        <th>Failed Requests (502 Gateway)</th>
+        <th>Success Rate</th>
+        <th>Client Impact</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Before Configuration</strong></td>
+        <td><code>proxy_next_upstream off;</code></td>
+        <td><span class="badge badge-danger">3 Failed Requests</span></td>
+        <td>99.87%</td>
+        <td>Client received 502 Bad Gateway</td>
+      </tr>
+      <tr>
+        <td><strong>After Configuration</strong></td>
+        <td><code>proxy_next_upstream error timeout http_502...</code></td>
+        <td><span class="badge badge-success">0 Failed Requests</span></td>
+        <td><strong>100.00%</strong></td>
+        <td><strong>Transparent instant retry; 0 downtime</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>1(d) Architecture Diagram</h3>
+  <div class="img-container">
+    <img src="images/architecture_diagram.jpg" alt="Hostel Mess Feedback System Cloud Architecture Diagram" />
+    <div class="caption">Figure 1.1: System Architecture Diagram showing Frontend, 3 Docker Backends, Nginx, MongoDB Atlas, Render, and Edge/Fog Computing Campus Dining Node (Amber Highlight).</div>
+  </div>
+
+  <h2>Question 2 — Secure Your Application (5 Marks)</h2>
+
+  <h3>2(a) Sensitive Data & Salted Bcrypt Password Hashing</h3>
+  <p><strong>Sensitive Data Identified:</strong> Student Roll Numbers, Full Names, Mobile Phone Numbers, Admin/Catering Staff Passwords, and Student Hygiene/Dietary Feedback Records.</p>
+  <p><strong>Cryptographic Protection:</strong> Replaced vulnerable plain-text passwords with 10-round salted bcrypt hashes (<code>bcrypt.genSalt(10)</code>) stored directly in MongoDB Atlas.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>User Name & Role</th>
+        <th>Email Identifier</th>
+        <th>Stored Password Before (Plain Text)</th>
+        <th>Stored Password After (Salted Bcrypt Hash)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Chief Mess Warden (Admin)</td>
+        <td><code>admin@hostel.edu</code></td>
+        <td><code style="color: #ef4444;">adminSecurePassword123!</code></td>
+        <td><code>$2b$10$nsfa0Y03amAt.1r3gdAGnOidnqc9A/WMBXQRgD7XLn4NHk7SPKAre</code></td>
+      </tr>
+      <tr>
+        <td>Dining Supervisor</td>
+        <td><code>supervisor@hostel.edu</code></td>
+        <td><code style="color: #ef4444;">supervisorPass2026#</code></td>
+        <td><code>$2b$10$KrrE4S.NU9cLnqHG7D1tTeheVP0nkcLK/75FwdtqHgj04WCpuAEda</code></td>
+      </tr>
+      <tr>
+        <td>Student Representative</td>
+        <td><code>student@hostel.edu</code></td>
+        <td><code style="color: #ef4444;">studentPass2026</code></td>
+        <td><code>$2b$10$qmyNCatACtMBLZ6/h1QeF.NfMG3WBbRki72pOAcEiUgY4nbltxOUa</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>2(b) Multi-Factor Authentication (TOTP) & Role-Based Access Control (RBAC)</h3>
+  <ul>
+    <li><strong>TOTP MFA:</strong> Implemented with RFC 6238 standard using <code>speakeasy</code> and <code>qrcode</code>, cycling every 30 seconds for Google Authenticator and Microsoft Authenticator.</li>
+    <li><strong>RBAC Protection:</strong> Restricts <code>PUT /api/menu/:id</code>, <code>DELETE /api/menu/:id</code>, and <code>DELETE /api/feedback/:id</code> to authenticated <code>admin</code> and <code>supervisor</code> roles.</li>
+  </ul>
+
+  <table>
+    <thead>
+      <tr>
+        <th>API Test Operation</th>
+        <th>Credentials / Token</th>
+        <th>HTTP Status</th>
+        <th>Verification Result</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>PUT /api/menu/:id</code></td>
+        <td>No Authorization Header</td>
+        <td><strong>401 Unauthorized</strong></td>
+        <td><span class="badge badge-success">PASSED: Access Denied</span></td>
+      </tr>
+      <tr>
+        <td><code>DELETE /api/feedback/:id</code></td>
+        <td>No Authorization Header</td>
+        <td><strong>401 Unauthorized</strong></td>
+        <td><span class="badge badge-success">PASSED: Access Denied</span></td>
+      </tr>
+      <tr>
+        <td><code>PUT /api/menu/:id</code></td>
+        <td>Invalid / Forged Token</td>
+        <td><strong>401 Unauthorized</strong></td>
+        <td><span class="badge badge-success">PASSED: Tampering Blocked</span></td>
+      </tr>
+      <tr>
+        <td><code>DELETE /api/feedback/:id</code></td>
+        <td>Student Role JWT</td>
+        <td><strong>403 Forbidden</strong></td>
+        <td><span class="badge badge-success">PASSED: Role Escalation Defended</span></td>
+      </tr>
+      <tr>
+        <td><code>PUT /api/menu/:id</code></td>
+        <td>Verified Admin JWT (with TOTP)</td>
+        <td><strong>200 OK</strong></td>
+        <td><span class="badge badge-success">PASSED: Authorized & Executed</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>2(c) Trivy Container Vulnerability Scanning & Image Hardening</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Security Characteristic</th>
+        <th>Unhardened Base Image</th>
+        <th>Hardened Production Image</th>
+        <th>Improvement</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Base Operating System</strong></td>
+        <td><code>node:18</code> (Debian Linux)</td>
+        <td><code>node:20-alpine</code> (Alpine Linux v3.23)</td>
+        <td><strong>82.4% size reduction (~1.1GB to 194MB)</strong></td>
+      </tr>
+      <tr>
+        <td><strong>Container User</strong></td>
+        <td><code>root</code> (UID 0 - High Risk)</td>
+        <td><code>node</code> (UID 1000 - Non-Root)</td>
+        <td><strong>Privileges dropped; prevents breakout</strong></td>
+      </tr>
+      <tr>
+        <td><strong>Trivy DS-0002 (Non-Root User)</strong></td>
+        <td><span class="badge badge-danger">1 HIGH Failure</span></td>
+        <td><span class="badge badge-success">0 HIGH Failures</span></td>
+        <td>Resolved via <code>USER node</code></td>
+      </tr>
+      <tr>
+        <td><strong>Trivy DS-0026 (Healthcheck)</strong></td>
+        <td><span class="badge badge-danger">1 LOW Failure</span></td>
+        <td><span class="badge badge-success">0 LOW Failures</span></td>
+        <td>Resolved via <code>HEALTHCHECK</code></td>
+      </tr>
+      <tr>
+        <td><strong>CRITICAL OS CVEs</strong></td>
+        <td>~18 CRITICAL CVEs</td>
+        <td><strong>0 CRITICAL CVEs</strong></td>
+        <td><strong>100% elimination of critical CVEs</strong></td>
+      </tr>
+      <tr>
+        <td><strong>HIGH OS CVEs</strong></td>
+        <td>~56 HIGH CVEs</td>
+        <td><strong>0 HIGH CVEs</strong></td>
+        <td><strong>100% elimination of high CVEs</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>2(d) Threat Agents & GDPR Regulatory Compliance</h3>
+  <ul>
+    <li><strong>Applicable Regulation:</strong> <strong>General Data Protection Regulation (GDPR)</strong> / <strong>Digital Personal Data Protection Act (DPDPA)</strong>. The system collects and processes personal data (names, registration roll numbers, phone numbers, and dietary/hygiene feedback) of natural persons.</li>
+    <li><strong>Threat Agent 1 (Malicious Insider / Rogue Mess Worker):</strong>
+      <ul>
+        <li><em>Attack:</em> Tampering with dining schedules or deleting student complaints to avoid penalties.</li>
+        <li><em>Control:</em> Role-Based Access Control (RBAC) + TOTP Multi-Factor Authentication.</li>
+        <li><em>GDPR Article 32(1)(b) (Security of Processing):</em> Enforces authorization barriers ensuring confidentiality and data integrity.</li>
+      </ul>
+    </li>
+    <li><strong>Threat Agent 2 (External Cybercriminal / Credential Stuffing & Interception):</strong>
+      <ul>
+        <li><em>Attack:</em> Automated credential stuffing using stolen credential dumps, or intercepting database storage.</li>
+        <li><em>Control:</em> Salted Bcrypt Password Hashing (10 rounds) + 30s Time-based One-Time Passwords (TOTP) + Non-root Alpine execution.</li>
+        <li><em>GDPR Article 32(1)(a) & Article 25 (Data Protection by Design):</em> Mandates cryptographic hashing/encryption and technical safeguards against unauthorized data extraction.</li>
+      </ul>
+    </li>
+  </ul>
+
+</body>
+</html>

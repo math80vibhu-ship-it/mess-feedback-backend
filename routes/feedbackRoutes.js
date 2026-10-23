@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const Feedback = require('../models/Feedback');
+const { protect, authorize } = require('../middleware/auth');
 
 // @route   POST /api/feedback
 // @desc    Submit feedback for a meal (student)
@@ -82,12 +83,16 @@ router.get('/:menuId', async (req, res) => {
 });
 
 // @route   DELETE /api/feedback/:id
-// @desc    Delete a feedback entry (admin, e.g. inappropriate comment)
-router.delete('/:id', async (req, res) => {
+// @desc    Delete a feedback entry (Restricted: admin / supervisor only with valid token - Question 2b)
+router.delete('/:id', protect, authorize('admin', 'supervisor'), async (req, res) => {
   try {
     const deletedFeedback = await Feedback.findByIdAndDelete(req.params.id);
     if (!deletedFeedback) return res.status(404).json({ message: 'Feedback not found' });
-    res.json({ message: 'Feedback deleted successfully' });
+    res.json({
+      success: true,
+      message: 'Feedback deleted successfully',
+      deletedId: req.params.id,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -1,0 +1,20 @@
+# UNHARDENED DOCKERFILE (For Question 2c baseline scan)
+# Vulnerable characteristics:
+# 1. Heavy base image (full Debian suite with numerous installed packages and utilities)
+# 2. Runs as root user by default
+# 3. No minimal package stripping
+
+FROM node:18
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+EXPOSE 5000
+
+# Runs as root
+CMD ["node", "server.js"]
