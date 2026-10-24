@@ -14,7 +14,3 @@ k6 run tests/failover_test.js
 Write-Host "Restarting mess_backend_2..." -ForegroundColor Gray
 docker start mess_backend_2 | Out-Null
 
-Write-Host "`n>>> [SCREENSHOT 6 READY!] <<<" -ForegroundColor Green
-Write-Host "Notice the green checks (✓ 100% succeeded, 0 failed requests)!" -ForegroundColor Green
-Write-Host "Press Win + Shift + S to take a screenshot of this terminal window!" -ForegroundColor Yellow
-Write-Host "Paste it in Word under Question 1(c) - After Configuration." -ForegroundColor Yellow
