@@ -46,12 +46,20 @@ app.use('/api/menu', menuRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/auth', authRoutes);
 
-// Serve index.html for root route
-app.get('/', (req, res) => {
+// Serve index.html for root route and common UI subpaths
+app.get(['/', '/admin', '/login', '/admin.html', '/login.html', '/mfa'], (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// 404 handler
+// Fallback: Any non-API route serves index.html
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    return next();
+  }
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// 404 handler for unmatched API routes
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });

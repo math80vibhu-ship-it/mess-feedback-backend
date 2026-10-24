@@ -142,6 +142,22 @@ roleAdminBtn.addEventListener("click", () => {
   loginSubtitle.textContent = "Enter administrator credentials (Salted bcrypt + TOTP MFA protected)";
 });
 
+const headerAdminLoginBtn = document.getElementById("headerAdminLoginBtn");
+if (headerAdminLoginBtn) {
+  headerAdminLoginBtn.addEventListener("click", () => {
+    loginOverlay.classList.remove("hidden");
+    roleAdminBtn.click();
+  });
+}
+
+// Auto-open Admin MFA tab if URL contains 'admin' or 'login'
+window.addEventListener("DOMContentLoaded", () => {
+  if (window.location.pathname.includes("admin") || window.location.pathname.includes("login") || window.location.hash.includes("admin")) {
+    loginOverlay.classList.remove("hidden");
+    roleAdminBtn.click();
+  }
+});
+
 // Step 1: Login Form Submission
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
