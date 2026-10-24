@@ -3,10 +3,23 @@
 // Assignment 3: Scaled High-Availability Cluster & RBAC Security Suite
 // ==========================================================================
 
-// In local Docker / Nginx environment, use relative origin ""; fallback to Render if hosted remotely
-const API_BASE_URL = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
-  ? ""
-  : "https://mess-feedback-backend-1z0s.onrender.com";
+// Determine backend API URL:
+// 1. If running on port 80 (Docker Nginx directly at http://localhost), use relative ""
+// 2. If running on Live Server / local dev server (port 5500, 3000, etc.) or file://, route to http://localhost (Docker Nginx)
+// 3. If hosted remotely on Vercel/cloud, fallback to Render
+let API_BASE_URL = "";
+if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+  if (window.location.port && window.location.port !== "80") {
+    // Running under Live Server (e.g. port 5500) -> Target Docker Nginx on port 80
+    API_BASE_URL = "http://localhost";
+  } else {
+    API_BASE_URL = "";
+  }
+} else if (window.location.protocol === "file:") {
+  API_BASE_URL = "http://localhost";
+} else {
+  API_BASE_URL = "https://mess-feedback-backend-1z0s.onrender.com";
+}
 
 // Application State
 let allMenus = [];
