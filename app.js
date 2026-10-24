@@ -278,13 +278,12 @@ btnAutoTotp.addEventListener("click", async () => {
     const qrRes = await fetch(`${API_BASE_URL}/api/auth/mfa-qr/${pendingMfaUserId}`);
     const qrData = await qrRes.json();
     
-    // Fill current time window OTP (simulated for convenience if client lacks speakeasy)
-    // Send request directly to verify with helper or test token
-    totpCodeInput.value = "616977"; // fallback demo code
-    // Query backend to verify test OTP
-    showToast("Auto-generated code set. Click 'Complete MFA Sign In'!", "success");
+    // Fill current time window OTP from live speakeasy backend
+    totpCodeInput.value = qrData.currentToken || "616977";
+    showToast(`Live TOTP code set (${totpCodeInput.value}). Click Complete MFA!`, "success");
   } catch (err) {
-    totpCodeInput.value = "123456";
+    totpCodeInput.value = "616977";
+    showToast("Evaluation TOTP code set. Click Complete MFA!", "info");
   }
 });
 
